@@ -1,0 +1,207 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> python-rekor-monitor-template\main.py:1:1
+   |
+ 1 | / import argparse
+ 2 | | import requests
+ 3 | | import base64
+ 4 | | import json
+ 5 | | import os
+ 6 | | import sys
+ 7 | | from util import extract_public_key, verify_artifact_signature
+ 8 | | from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
+   | |_______________________________________________________________________________________________^
+ 9 |
+10 |   def get_log_entry(log_index, debug=False):
+   |
+help: Organize imports
+   |
+1  | import argparse
+   - import requests
+2  | import base64
+3  | import json
+4  | import os
+5  | import sys
+6  +
+7  + import requests
+8  + from merkle_proof import (
+9  +     DefaultHasher,
+10 +     compute_leaf_hash,
+11 +     verify_consistency,
+12 +     verify_inclusion,
+13 + )
+14 | from util import extract_public_key, verify_artifact_signature
+   - from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
+15 |
+16 +
+17 | def get_log_entry(log_index, debug=False):
+   |
+
+RUF015 Prefer `next(iter(data.keys()))` over single element slice
+  --> python-rekor-monitor-template\main.py:19:18
+   |
+18 |     data = response.json()
+19 |     entry_uuid = list(data.keys())[0]
+   |                  ^^^^^^^^^^^^^^^^^^^^
+20 |     return data, entry_uuid
+   |
+help: Replace with `next(iter(data.keys()))`
+   |
+18 |     data = response.json()
+   -     entry_uuid = list(data.keys())[0]
+19 +     entry_uuid = next(iter(data.keys()))
+20 |     return data, entry_uuid
+   |
+note: This is an unsafe fix and may change runtime behavior
+
+RUF015 Prefer `next(iter(data.keys()))` over single element slice
+  --> python-rekor-monitor-template\main.py:31:18
+   |
+30 |     data = response.json()
+31 |     entry_uuid = list(data.keys())[0]
+   |                  ^^^^^^^^^^^^^^^^^^^^
+32 |     return data[entry_uuid].get('verification', {}).get('inclusionProof', {})
+   |
+help: Replace with `next(iter(data.keys()))`
+   |
+30 |     data = response.json()
+   -     entry_uuid = list(data.keys())[0]
+31 +     entry_uuid = next(iter(data.keys()))
+32 |     return data[entry_uuid].get('verification', {}).get('inclusionProof', {})
+   |
+note: This is an unsafe fix and may change runtime behavior
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> python-rekor-monitor-template\merkle_proof.py:1:1
+  |
+1 | / import hashlib
+2 | | import binascii
+3 | | import base64
+  | |_____________^
+4 |
+5 |   # domain separation prefixes according to the RFC
+  |
+help: Organize imports
+  |
+1 + import base64
+2 + import binascii
+3 | import hashlib
+  - import binascii
+  - import base64
+4 |
+  |
+
+FURB161 Use of `bin(index >> inner).count('1')`
+  --> python-rekor-monitor-template\merkle_proof.py:88:14
+   |
+86 | def decomp_incl_proof(index, size):
+87 |     inner = inner_proof_size(index, size)
+88 |     border = bin(index >> inner).count('1')
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+89 |     return inner, border
+   |
+help: Replace with `(index >> inner).bit_count()`
+   |
+87 |     inner = inner_proof_size(index, size)
+   -     border = bin(index >> inner).count('1')
+88 +     border = (index >> inner).bit_count()
+89 |     return inner, border
+   |
+note: This is an unsafe fix and may change runtime behavior
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> python-rekor-monitor-template\util.py:1:1
+  |
+1 | / from cryptography import x509
+2 | | from cryptography.hazmat.backends import default_backend
+3 | | from cryptography.hazmat.primitives import serialization
+4 | |
+5 | | from cryptography.hazmat.primitives import hashes
+6 | | from cryptography.hazmat.primitives.asymmetric import ec
+7 | | from cryptography.hazmat.primitives.serialization import load_pem_public_key
+8 | | from cryptography.exceptions import InvalidSignature
+  | |____________________________________________________^
+help: Organize imports
+  |
+1 | from cryptography import x509
+2 + from cryptography.exceptions import InvalidSignature
+3 | from cryptography.hazmat.backends import default_backend
+  - from cryptography.hazmat.primitives import serialization
+  -
+  - from cryptography.hazmat.primitives import hashes
+4 + from cryptography.hazmat.primitives import hashes, serialization
+5 | from cryptography.hazmat.primitives.asymmetric import ec
+6 | from cryptography.hazmat.primitives.serialization import load_pem_public_key
+  - from cryptography.exceptions import InvalidSignature
+7 |
+  |
+
+F401 [*] `cryptography.hazmat.primitives.asymmetric.ec` imported but unused
+ --> python-rekor-monitor-template\util.py:6:55
+  |
+5 | from cryptography.hazmat.primitives import hashes
+6 | from cryptography.hazmat.primitives.asymmetric import ec
+  |                                                       ^^
+7 | from cryptography.hazmat.primitives.serialization import load_pem_public_key
+8 | from cryptography.exceptions import InvalidSignature
+  |
+help: Remove unused import: `cryptography.hazmat.primitives.asymmetric.ec`
+  |
+5 | from cryptography.hazmat.primitives import hashes
+  - from cryptography.hazmat.primitives.asymmetric import ec
+6 | from cryptography.hazmat.primitives.serialization import load_pem_public_key
+  |
+
+F841 Local variable `data` is assigned to but never used
+  --> python-rekor-monitor-template\util.py:48:9
+   |
+46 |     # load the data to be verified
+47 |     with open(artifact_filename, "rb") as data_file:
+48 |         data = data_file.read()
+   |         ^^^^
+49 |
+50 |     # verify the signature
+   |
+help: Remove assignment to unused variable `data`
+   |
+47 |     with open(artifact_filename, "rb") as data_file:
+   -         data = data_file.read()
+48 +         data_file.read()
+49 |
+   |
+note: This is an unsafe fix and may change runtime behavior
+
+F821 Undefined name `file_data`
+  --> python-rekor-monitor-template\util.py:54:13
+   |
+52 |         public_key.verify(
+53 |             signature,
+54 |             file_data,
+   |             ^^^^^^^^^
+55 |             padding.PKCS1v15(),
+56 |             hashes.SHA256()
+   |
+
+F821 Undefined name `padding`
+  --> python-rekor-monitor-template\util.py:55:13
+   |
+53 |             signature,
+54 |             file_data,
+55 |             padding.PKCS1v15(),
+   |             ^^^^^^^
+56 |             hashes.SHA256()
+57 |         )
+   |
+
+BLE001 Do not catch blind exception: `Exception`
+  --> python-rekor-monitor-template\util.py:61:12
+   |
+59 |     except InvalidSignature:
+60 |         return False
+61 |     except Exception as e:
+   |            ^^^^^^^^^
+62 |         print(f"Verification error: {e}")
+63 |         return False 
+   |
+
+Found 11 errors.
+[*] 4 fixable with `--fix` (4 unsafe fixes available with `--fix --unsafe-fixes`).
