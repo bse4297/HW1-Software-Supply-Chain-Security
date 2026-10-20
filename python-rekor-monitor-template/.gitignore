@@ -1,0 +1,20 @@
+# Build and cache artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+env/
+
+# Coverage and testing outputs
+.coverage
+htmlcov/
+coverage.xml
+checkpoint.json
+
+# Secrets and environment variables
+.env
+.secret
